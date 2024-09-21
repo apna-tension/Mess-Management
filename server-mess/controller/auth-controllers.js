@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const nodemailer = require("nodemailer");
+const twilio = require("twilio");
 const randomstring = require("randomstring");
 
 const home = async (req, res) => {
@@ -105,6 +106,40 @@ const register = async (req, res) => {
   }
 };
 
+// const login = async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     let user = await User.findOne({ email });
+//     if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+//     if (!user.isVerified) {
+//       console.log("User is not verified");
+//       return res.status(401).json({ message: "Email not verified" });
+//     }
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch)
+//       return res.status(400).json({ message: "Invalid credentials" });
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: "1h",
+//     });
+//     console.log("Login Successfully");
+//     res.json({
+//       token,
+//       user: {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         phoneNumber: user.phoneNumber,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -112,28 +147,43 @@ const login = async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-    if (!user.isVerified) {
-      console.log("User is not verified");
-      return res.status(401).json({ message: "Email not verified" });
-    }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    console.log("Login Successfully");
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-      },
-    });
+    // Generate verification code
+    const verificationCode = randomstring.generate(6);
+    user.verificationCode = verificationCode;
+    await user.save();
+
+    // Send verification code based on user's preference (e.g., SMS or email)
+    
+      // Send email using Nodemailer
+      const transporter = nodemailer.createTransport({
+        // Your email provider configuration
+        service: "gmail",
+        auth: {
+          user: "aminulislam.it2022@nsec.ac.in",
+          pass: "mkme wkge azcm nuxs",
+        },
+      });
+
+      const mailOptions = {
+        from: "aminulislam.it2022@nsec.ac.in",
+        to: user.email,
+        subject: "2FA Verification",
+        text: `Your verification code is: ${verificationCode}`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+
+    return res.status(200).json({ message: "Verification code sent" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -172,10 +222,37 @@ const verifyEmail = async (req, res) => {
   } catch (error) {
     // ... handle errors
     console.error("Server Error for verification");
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({ message: "Server error during verify email when register" });
   }
 };
 
-module.exports = { home, register, login, getUser, verifyEmail };
+const verifyLogin = async (req, res) => {
+  const { email, verificationCode } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.verificationCode === verificationCode) {
+      // Generate a JWT token and return it
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      return res.status(200).json({ token });
+    } else {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+  } catch (error) {
+    // ... handle errors
+    console.error("Server Error for login 2-factor authentication");
+    res.status(500).json({ message: "Server error during login verification" });
+  }
+};
+
+module.exports = { home, register, login, getUser, verifyEmail, verifyLogin };
 
 // module.exports = { home, register, login };

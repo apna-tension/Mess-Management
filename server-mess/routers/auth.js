@@ -15,10 +15,14 @@ router.route('/register').post(validate(registerSchema), authController.register
 // Login user
 router.route('/login').post(validate(loginSchema), authController.login);
 
-// verify-email router
+// verify-email while registering
 router.route('/verify-email').post(authController.verifyEmail);
 
 // Get user
 router.route('/user').get(authMiddleware ,authController.getUser);
 
+// verify-email while login
+router.route('/verify-login').post(authController.verifyLogin);
+
+// export router
 module.exports = router;

@@ -20,9 +20,17 @@ const userSchema = new mongoose.Schema({
     },
     verificationCode: {
         type: String,
-        required: false, // Make it optional for existing users
+        required: false,
     },
     isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    isPending: {
+        type: Boolean,
+        default: true,
+    },
+    isApproved: {
         type: Boolean,
         default: false,
     },

@@ -18,6 +18,15 @@ const authMiddleware = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+
+    // Check for admin status if needed (e.g., for admin routes)
+    if (req.url.startsWith("/admin")) {
+      if (!userData.isAdmin) {
+        return res.status(401).json({ message: "Unauthorized: Admin access required" });
+      }
+    }
+
+    
     req.user = userData; // Attach user data to the request object
     next(); // Call next to proceed to the next middleware/route handler
   } catch (error) {

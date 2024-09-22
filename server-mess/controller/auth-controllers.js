@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
@@ -8,14 +9,16 @@ const nodemailer = require("nodemailer");
 const twilio = require("twilio");
 const randomstring = require("randomstring");
 
+// ------------------- Default page -------------------
 const home = async (req, res) => {
   try {
-    res.status(200).send("Hello World!");
+    res.status(200).send("Hello Developers!, this is auth/user router");
   } catch (err) {
     console.log(err);
   }
 };
 
+// ------------------- Register user -------------------
 // const register = async (req, res) => {
 //   const { name, email, password, phoneNumber } = req.body;
 
@@ -66,22 +69,26 @@ const register = async (req, res) => {
       password: hashedPassword,
       phoneNumber,
       verificationCode: randomstring.generate(6),
+      isPending: true,
     });
 
     await user.save();
 
     // Send verification email
+
     const transporter = nodemailer.createTransport({
       // Your email provider configuration
       service: "gmail",
       auth: {
-        user: "aminulislam.it2022@nsec.ac.in",
-        pass: "mkme wkge azcm nuxs",
+        user: process.env.USER_EMAIL, // Replace with your email
+        pass: process.env.USER_PASSWORD, // Replace with your password (stored securely)
       },
     });
-    console.log(user.verificationCode);
+    
+    // console.log(user.verificationCode);
+
     const mailOptions = {
-      from: "aminulislam.it2022@nsec.ac.in",
+      from: process.env.USER_EMAIL,
       to: user.email,
       subject: "Email Verification",
       text: `Your verification code   
@@ -91,8 +98,10 @@ const register = async (req, res) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
+        return res.status(500).send({ message: "Server error" });
       } else {
         console.log("Email sent: " + info.response);
+        return res.status(200).send({ message: "Registration successful. Please check your email for verification." });
       }
     });
 
@@ -106,6 +115,7 @@ const register = async (req, res) => {
   }
 };
 
+// ------------------- Login user -------------------
 // const login = async (req, res) => {
 //   const { email, password } = req.body;
 
@@ -157,37 +167,39 @@ const login = async (req, res) => {
     await user.save();
 
     // Send verification code based on user's preference (e.g., SMS or email)
-    
-      // Send email using Nodemailer
-      const transporter = nodemailer.createTransport({
-        // Your email provider configuration
-        service: "gmail",
-        auth: {
-          user: "aminulislam.it2022@nsec.ac.in",
-          pass: "mkme wkge azcm nuxs",
-        },
-      });
 
-      const mailOptions = {
-        from: "aminulislam.it2022@nsec.ac.in",
-        to: user.email,
-        subject: "2FA Verification",
-        text: `Your verification code is: ${verificationCode}`,
-      };
+    // Send email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      // Your email provider configuration
+      service: "gmail",
+      auth: {
+        user: process.env.USER_EMAIL,
+        pass: process.env.USER_PASSWORD,
+      },
+    });
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Email sent: " + info.response);
-        }
-      });
+    const mailOptions = {
+      from: process.env.USER_EMAIL,
+      to: user.email,
+      subject: "2FA Verification",
+      text: `Your verification code is: ${verificationCode}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
 
     return res.status(200).json({ message: "Verification code sent" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// ------------------- Get user -------------------
 
 const getUser = async (req, res) => {
   try {
@@ -199,6 +211,8 @@ const getUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// ------------------- Verify email -------------------
 
 const verifyEmail = async (req, res) => {
   const { email, verificationCode } = req.body;
@@ -227,6 +241,8 @@ const verifyEmail = async (req, res) => {
       .json({ message: "Server error during verify email when register" });
   }
 };
+
+// ------------------- Verify login -------------------
 
 const verifyLogin = async (req, res) => {
   const { email, verificationCode } = req.body;

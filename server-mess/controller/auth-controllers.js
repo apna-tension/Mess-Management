@@ -70,6 +70,7 @@ const register = async (req, res) => {
       phoneNumber,
       verificationCode: randomstring.generate(6),
       isPending: true,
+      role: 'user',
     });
 
     await user.save();
@@ -160,6 +161,12 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
+
+    // check if user is approved or not
+    if (!user.isApproved) {
+      return res.status(401).json({ message: "User is not approved" });
+    }
+
 
     // Generate verification code
     const verificationCode = randomstring.generate(6);

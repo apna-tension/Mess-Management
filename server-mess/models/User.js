@@ -46,7 +46,6 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods = {
   remove: function () {
-    // Notice the capital 'R'
     console.log(`Removing user: ${this._id}`);
     return this.deleteOne();
   },

@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
+
+
 // ------------------- Default page -------------------
 const home = async (req, res) => {
   try {
@@ -9,6 +11,8 @@ const home = async (req, res) => {
     console.log(err);
   }
 };
+
+
 
 // ----------------------------------get all registered approved users --------------------------------
 const getApprovedUsers = async (req, res) => {
@@ -23,6 +27,8 @@ const getApprovedUsers = async (req, res) => {
   }
 };
 
+
+
 // ----------------------------------get all pending users --------------------------------
 const getPendingUsers = async (req, res) => {
   try {
@@ -35,6 +41,8 @@ const getPendingUsers = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 // ----------------------------------approve user --------------------------------
 const approveUser = async (req, res) => {

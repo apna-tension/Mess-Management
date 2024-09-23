@@ -8,5 +8,6 @@ router.route('/').get(adminController.home);
 router.route('/pending-users').get(authMiddleware, adminController.getPendingUsers);
 router.route('/approve-user/:id').put(authMiddleware, adminController.approveUser);
 router.route('/deny-user/:id').put(authMiddleware, adminController.denyUser);
+router.route('/approved-users').get(authMiddleware, adminController.getApprovedUsers);
 
 module.exports = router;

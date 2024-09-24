@@ -9,6 +9,12 @@ const user = require('./routers/auth');
 // Import Admin routes
 const admin = require('./routers/admin');
 
+// import manager routes
+const manager = require('./routers/manager');
+
+// import user routers
+const userRoute = require('./routers/user');
+
 dotenv.config();
 const app = express();
 
@@ -29,6 +35,8 @@ app.get('/', (req, res) => {
 // Member routes (public, no protection required for registration)
 app.use('/auth/', user);
 app.use('/admin/', admin);
+app.use('/manager/', manager);
+app.use('/user/', userRoute);
 
 
 // Listen on the designated port

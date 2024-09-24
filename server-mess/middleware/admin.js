@@ -24,7 +24,7 @@ const adminMiddleware = async (req, res, next) => {
     // console.log("user is admin : ", userData.role === "admin");
     // console.log("user is admin : ", userData.role === "user");
     // Check for admin status if needed (e.g., for admin routes)
-    if (userData.role === "user") {
+    if (!userData.isAdmin) {
       return res
         .status(401)
         .json({ message: "Unauthorized: Admin access required" });

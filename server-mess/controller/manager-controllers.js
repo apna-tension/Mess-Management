@@ -42,7 +42,7 @@ const approveDeposit = async (req, res) => {
     const objectId = new mongoose.Types.ObjectId(userId);
     const user = await User.findById(objectId);
 
-    console.log("User is ", user); // Debugging check
+    // console.log("User is ", user); // Debugging check
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

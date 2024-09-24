@@ -35,11 +35,33 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "manager"],
       default: "user",
     },
+    messBalance: {
+      type: Number,
+      default: 0,
+    },
+    isPendingBalance: {
+        type: Boolean,
+        default: false,
+    },
+    pendingDeposits: [
+      {
+        amount: Number,
+        timestamp: Date,
+        isApproved: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

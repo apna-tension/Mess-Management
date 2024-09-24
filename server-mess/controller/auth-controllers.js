@@ -70,7 +70,7 @@ const register = async (req, res) => {
       phoneNumber,
       verificationCode: randomstring.generate(6),
       isPending: true,
-      role: 'user',
+      role: "user",
     });
 
     await user.save();
@@ -85,7 +85,7 @@ const register = async (req, res) => {
         pass: process.env.USER_PASSWORD, // Replace with your password (stored securely)
       },
     });
-    
+
     // console.log(user.verificationCode);
 
     const mailOptions = {
@@ -102,7 +102,12 @@ const register = async (req, res) => {
         return res.status(500).send({ message: "Server error" });
       } else {
         console.log("Email sent: " + info.response);
-        return res.status(200).send({ message: "Registration successful. Please check your email for verification." });
+        return res
+          .status(200)
+          .send({
+            message:
+              "Registration successful. Please check your email for verification.",
+          });
       }
     });
 
@@ -110,7 +115,12 @@ const register = async (req, res) => {
       expiresIn: "1h",
     });
     console.log("Register Successfully");
-    res.status(201).json({ token });
+    res
+      .status(201)
+      .json({
+        message:
+          "Registration successful. Please check your email for verification.",
+      });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -153,9 +163,10 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-
+  console.log("login hit");
   try {
     let user = await User.findOne({ email });
+    console.log("User is ", user);
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -167,8 +178,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "User is not approved" });
     }
 
-
-    // Generate verification code
+    // Generate verification <co></co>de
     const verificationCode = randomstring.generate(6);
     user.verificationCode = verificationCode;
     await user.save();

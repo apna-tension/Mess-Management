@@ -1,6 +1,6 @@
 const { z } = require("zod");
 
-
+// validate the login schema, like email is enter or not, email is valid or not, and password is valid
 const loginSchema = z.object({
     email: z
         .string({ required_error: "Email is required" })
@@ -12,6 +12,7 @@ const loginSchema = z.object({
 });
 
 
+// validate the name constraint(like minimum and maximum length), phone number, and email and password is inherited from the loginSchema 
 const registerSchema = loginSchema.extend({
     name: z
         .string({ required_error: "Name is required" })
@@ -23,4 +24,6 @@ const registerSchema = loginSchema.extend({
         .max(10, { message: "Phone number must be at most 10 digits" }),
 });
 
+
+// export all the methods
 module.exports = { loginSchema, registerSchema };

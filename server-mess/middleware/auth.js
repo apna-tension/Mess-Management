@@ -2,14 +2,19 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const authMiddleware = async (req, res, next) => {
+
+  // get the token
   const token = req.header("Authorization");
   if (!token) {
     return res.status(401).json({ message: "Access Denied. No token provided." });
   }
 
+  // convert the raw token to validate token
   const jwtToken = token.replace("Bearer", "").trim();
   
   try {
+
+    // decode the token
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET);  // Ensure to use the correct secret key (JWT_SECRET)
     
     // Find the user by ID and exclude the password from the response

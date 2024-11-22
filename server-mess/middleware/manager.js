@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const adminMiddleware = async (req, res, next) => {
+
+  // get the token from the server
   const token = req.header("Authorization");
   if (!token) {
     return res
@@ -9,9 +11,12 @@ const adminMiddleware = async (req, res, next) => {
       .json({ message: "Access Denied. No token provided." });
   }
 
+  // convert the raw token to JSON web token :- this is an encrypted token we neet to further decrypt the token
   const jwtToken = token.replace("Bearer", "").trim();
 
   try {
+
+    // decode the token into JSON web token using secret key
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET); // Ensure to use the correct secret key (JWT_SECRET)
 
     // Find the user by ID and exclude the password from the response
@@ -19,11 +24,9 @@ const adminMiddleware = async (req, res, next) => {
     if (!userData) {
       return res.status(404).json({ message: "User not found" });
     }
-    // console.log("user data is : ", userData);
-    // console.log("user role is : ", userData.role);
-    // console.log("user is admin : ", userData.role === "admin");
-    // console.log("user is admin : ", userData.role === "user");
-    // Check for admin status if needed (e.g., for admin routes)
+    
+
+    // Check for role status (e.g., user is a normal user of the admin)
     if (userData.role === "user") {
       return res
         .status(401)

@@ -6,9 +6,14 @@ const managerMiddleware = require('../middleware/manager');
 
 
 router.route('/').get(managerController.home);
-// router.route('/pending-deposit-request').get(managerMiddleware, managerController.getPendingDepositRequest);
+
+// manager of the mess see the pending deposit request
 router.route('/pending-deposits').get(managerMiddleware, managerController.getPendingDeposits);
+
+// manager approve the pending deposit request
 router.route('/approve-deposit/:id').put(managerMiddleware, managerController.approveDeposit);
+
+// manager deny the pending deposit request
 router.route('/deny-deposit/:id').put(managerMiddleware, managerController.denyDeposit);
 
 

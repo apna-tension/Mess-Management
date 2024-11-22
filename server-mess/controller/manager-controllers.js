@@ -1,7 +1,16 @@
+
+// --------------------------------------------------------------------------------------------------------------------
+// ------------------------------    MANAGER CONTROLLER (FINANCIAL RELATED...)    -----------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
-// ------------------- Default page -------------------
+
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------    DEFAULT/HOME PAGE    -----------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
 const home = async (req, res) => {
   try {
     res.status(200).send("Hello Developers!, this is manager router");
@@ -10,25 +19,48 @@ const home = async (req, res) => {
   }
 };
 
-// ---------------------------------- get all pending deposits --------------------------------
+
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------    GET ALL PENDING DEPOSIT    -----------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
+
 const getPendingDeposits = async (req, res) => {
   try {
-    // const pendingDeposits = await User.find().populate("pendingDeposits");
-    const pendingDeposits = await User.find({
-      pendingDeposits: {
-        $elemMatch: { isApproved: false },
-      },
-    });
-    if (pendingDeposits.length === 0) {
+    // Fetch users who have pending deposits
+    const usersWithPendingDeposits = await User.find({
+      pendingDeposits: { $elemMatch: { isApproved: false } },
+    }).select("name email pendingDeposits");
+
+    if (usersWithPendingDeposits.length === 0) {
       return res.status(404).json({ message: "No pending deposits found" });
     }
-    res.status(200).json(pendingDeposits);
+
+    // Format response to show only pending and approved deposits for each user
+    const formattedDeposits = usersWithPendingDeposits.map(user => ({
+      id: user.id,
+      userName: user.name,
+      email: user.email,
+      pendingDeposits: user.pendingDeposits.filter(deposit => !deposit.isApproved),
+      approvedDeposits: user.pendingDeposits.filter(deposit => deposit.isApproved),
+    }));
+
+    res.status(200).json({
+      totalUsersWithPendingDeposits: formattedDeposits.length,
+      deposits: formattedDeposits,
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ---------------------------------- approve deposit --------------------------------
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------    APPROVE DEPOSIT    -----------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 
 const approveDeposit = async (req, res) => {
   try {
@@ -68,7 +100,10 @@ const approveDeposit = async (req, res) => {
   }
 };
 
-// ---------------------------------- deny deposit --------------------------------
+
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------    DENY DEPOSIT    -----------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 
 const denyDeposit = async (req, res) => {
   try {
@@ -107,8 +142,11 @@ const denyDeposit = async (req, res) => {
 };
 
 
-// ------------------- Export -------------------
-// export
+
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------    EXPORTING METHODS    -----------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+
 
 module.exports = {
   home,
